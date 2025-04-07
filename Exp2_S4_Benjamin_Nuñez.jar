@@ -1,0 +1,116 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
+ */
+import java.util.Scanner;
+
+public class intento3 {
+    public static void main(String[] args) {
+        
+// Paso 1: Despliegue del menú principal
+        Scanner scanner = new Scanner(System.in);
+        boolean continuar = true;
+
+        while (continuar) {
+            // Paso 1: Despliegue del menú principal
+            System.out.println("Menu Principal:");
+            System.out.println("Bienvenidos al Teatro Moro:");
+            System.out.println("1. Comprar entrada");
+            System.out.println("2. Salir");
+            System.out.print("Seleccione una opcion: ");
+
+
+            int opcion = scanner.nextInt();
+
+            if (opcion == 1) {
+                
+// Paso 2: Compra de entradas
+
+
+                System.out.println("Seleccione la ubicacion del asiento (Zona A, B, C):");
+                String zona = scanner.next();
+                if (zona.equals("A")){
+            System.out.println("Has seleccionado la zona " + zona + ".");  
+            System.out.println(" Escoja asiento:");
+            System.out.println("[01] [02] [03] [04] [05] [06] [07] [08] [09] [10]  \n" +
+"[11] [12] [13] [14] [15] [16] [17] [18] [19] [20]  \n" +
+"[21] [22] [23] [24] [25] [26] [27] [28] [29] [30]  \n" +
+"[31] [32] [33] [34] [35] [36] [37] [38] [39] [40]  \n" +
+"[41] [42] [43] [44] [45] [46] [47] [48] [49] [50]  ");
+    } else if (zona.equals("B")){
+            System.out.println("Has seleccionado la zona " + zona + ".");  
+            System.out.println(" Escoja asiento:");
+            System.out.println("[51] [52] [53] [54] [55] [56] [57] [58] [59] [60]  \n" +
+"[61] [62] [63] [64] [65] [66] [67] [68] [69] [70]  \n" +
+"[71] [72] [73] [74] [75] [76] [77] [78] [79] [80]  \n" +
+"[81] [82] [83] [84] [85] [86] [87] [88] [89] [90]  \n" +
+"[91] [92] [93] [94] [95] [96] [97] [98] [99] [100]");
+        } else if (zona.equals("C")){
+            System.out.println("Has seleccionado la zona " + zona + ".");  
+            System.out.println(" Escoja asiento:");
+            System.out.println("[101] [102] [103] [104] [105] [106] [107] [108] [109] [110]  \n" +
+"[111] [112] [113] [114] [115] [116] [117] [118] [119] [120]  \n" +
+"[121] [122] [123] [124] [125] [126] [127] [128] [129] [130]  \n" +
+"[131] [132] [133] [134] [135] [136] [137] [138] [139] [140]  \n" +
+"[141] [142] [143] [144] [145] [146] [147] [148] [149] [150]");
+        }else{
+            
+       
+                   
+                    System.out.println("Ubicación invalida. Por favor, seleccione una zona valida.");
+                    continue;
+                }
+                
+            System.out.print("Seleccione un asiento: ");
+                    String asiento = scanner.next();
+            System.out.println("Has seleccionado el asiento " + asiento + ".");
+            
+            
+                System.out.println("Ingrese su edad:");
+                int edad = scanner.nextInt();
+                double descuento = 0;
+                if (edad < 0) {
+                    System.out.println("Edad invalida. Por favor, ingrese una edad valida.");
+                    continue;
+                } else if (edad <= 18) {
+                    descuento = 0.10;
+                } else if (edad >= 65) {
+                    descuento = 0.15;
+                }
+
+                double precioBase = 10000; // Precio base de la entrada
+                double precioFinal = precioBase;
+                int intentos = 0;
+
+                // Aplicar descuento
+                while (intentos < 1) {
+                    if (descuento > 0) {
+                        precioFinal = precioBase - (precioBase * descuento);
+                    }
+                    intentos++;
+                }
+
+
+                // Paso 3: Visualización del resumen de la compra
+                System.out.println("Resumen de la compra:");
+                System.out.println("Ubicacion del asiento: Zona " + zona);
+                System.out.println("Precio base de la entrada: $" + precioBase);
+                System.out.println("Descuento aplicado: " + (descuento * 100) + "%");
+                System.out.println("Precio final a pagar: $" + precioFinal);
+
+                // Paso 4: Ciclos iterativos
+                System.out.println("Desea realizar otra compra? (s/n)");
+                String respuesta = scanner.next();
+                if (respuesta.equalsIgnoreCase("n")) {
+                    continuar = false;
+                }
+            } else if (opcion == 2) {
+                continuar = false;
+            } else {
+                System.out.println("Opcion invalida. Por favor, seleccione una opcion valida.");
+            }
+        }
+
+        scanner.close();
+    }
+}
