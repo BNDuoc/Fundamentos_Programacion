@@ -1,0 +1,200 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
+ */
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class Exp2_S5_Benjamin_Nuñez {
+    // Variables para los descuentos y precios de las entradas
+    private static final double DESCUENTO_ESTUDIANTE = 0.10;
+    private static final double DESCUENTO_TERCERA_EDAD = 0.15;
+    private static final double PRECIO_VIP = 10000.0;
+    private static final double PRECIO_PLATEA = 7000.0;
+    private static final double PRECIO_GENERAL = 5000.0;
+
+    // Variables base para almacenar las entradas vendidas
+    private static ArrayList<Entrada> entradasVendidas = new ArrayList<>();
+    private static double totalIngresos = 0;
+    private static int totalEntradasVendidas = 0;
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int opcion;
+
+        // Bucle principal del menú de opciones
+        do {
+            mostrarMenu();
+            opcion = scanner.nextInt();
+            scanner.nextLine(); // Consumir el salto de línea
+
+            // Estructura condicional para manejar las opciones del menú
+            switch (opcion) {
+                case 1:
+                    venderEntrada(scanner);
+                    break;
+                case 2:
+                    mostrarPromociones();
+                    break;
+                case 3:
+                    buscarEntrada(scanner);
+                    break;
+                case 4:
+                    eliminarEntrada(scanner);
+                    break;
+                case 5:
+                    System.out.println("Saliendo, gracias por usar nuestro sistema...");
+                    break;
+                default:
+                    System.out.println("Opción inválida. Por favor, intenta nuevamente.");
+            }
+        } while (opcion != 5);
+
+        scanner.close();
+    }
+
+    // Menu principal
+    
+    private static void mostrarMenu() {
+        
+        
+        System.out.println("Menu Principal:");
+        System.out.println("1. Comprar entradas");
+        System.out.println("2. Ver promociones");
+        System.out.println("3. Busqueda de entradas");
+        System.out.println("4. Eliminacion de entradas");
+        System.out.println("5. Salir");
+        System.out.print("Selecciona una opcion: ");
+    }
+
+    // Venta de entrada
+    private static void venderEntrada(Scanner scanner) {
+        System.out.print("Ingresa la ubicacion de la entrada (VIP, Platea, General): ");
+        String ubicacion = scanner.nextLine();
+        System.out.print("Eres estudiante? (s/n): ");
+        boolean esEstudiante = scanner.nextLine().equalsIgnoreCase("s");
+        System.out.print("Eres persona de la tercera edad? (s/n): ");
+        boolean esTerceraEdad = scanner.nextLine().equalsIgnoreCase("s");
+
+        // Funciones
+        double precioBase = obtenerPrecioBase(ubicacion);
+        
+        double descuento = obtenerDescuento(esEstudiante, esTerceraEdad);
+       
+        double precioFinal = precioBase * (1 - descuento);
+
+        // Crear una nueva entrada y agregarla a la lista de entradas vendidas
+        Entrada entrada = new Entrada(totalEntradasVendidas + 1, ubicacion, precioFinal);
+        entradasVendidas.add(entrada);
+        totalIngresos += precioFinal;
+        totalEntradasVendidas++;
+
+        System.out.println("Entrada vendida con exito. Precio final: $" + precioFinal);
+        System.out.println("Desea alguna nueva accion:");
+            
+
+    }
+
+    // Método para obtener el precio base según la ubicación
+    private static double obtenerPrecioBase(String ubicacion) {
+        switch (ubicacion.toLowerCase()) {
+            case "vip":
+                return PRECIO_VIP;
+            case "platea":
+                return PRECIO_PLATEA;
+            case "general":
+                return PRECIO_GENERAL;
+            default:
+                System.out.println("Ubicación inválida. Se asignará precio general.");
+                return PRECIO_GENERAL;
+        }
+    }
+
+    // Método para obtener el descuento aplicable
+    private static double obtenerDescuento(boolean esEstudiante, boolean esTerceraEdad) {
+        if (esEstudiante) {
+            return DESCUENTO_ESTUDIANTE;
+        } else if (esTerceraEdad) {
+            return DESCUENTO_TERCERA_EDAD;
+        } else {
+            return 0;
+        }
+    }
+
+    // Menu de promociones disponibles
+    private static void mostrarPromociones() {
+        System.out.println("Promociones disponibles:");
+        System.out.println("1. Descuento del 10% para estudiantes.");
+        System.out.println("2. Descuento del 15% para personas de la tercera edad.");
+        System.out.println("3. Descuento especial por compra de multiples entradas.");
+    }
+
+    // Método para buscar una entrada por su número para eliminarla - Profe no pude hacer esta parte se intento.
+    private static void buscarEntrada(Scanner scanner) {
+        System.out.print("Ingresa el numero de entrada a buscar: ");
+        int numero = scanner.nextInt();
+        scanner.nextLine(); // Consumir el salto de línea
+
+        // Bucle para recorrer la lista de entradas vendidas y buscar la entrada
+        for (Entrada entrada : entradasVendidas) {
+            if (entrada.getNumero() == numero) {
+                System.out.println("Entrada encontrada: " + entrada);
+                return;
+            }
+        }
+        System.out.println("Entrada no encontrada.");
+    }
+
+    // Eliminar una entrada por su número
+    private static void eliminarEntrada(Scanner scanner) {
+        System.out.print("Ingresa el numero de entrada a eliminar: ");
+        int numero = scanner.nextInt();
+        scanner.nextLine(); 
+
+        for (Entrada entrada : entradasVendidas) {
+            if (entrada.getNumero() == numero) {
+                entradasVendidas.remove(entrada);
+                totalIngresos -= entrada.getPrecioFinal();
+                totalEntradasVendidas--;
+                System.out.println("Entrada eliminada con exito.");
+                return;
+            }
+        }
+        System.out.println("Entrada no encontrada.");
+    }
+}
+
+// Clase para representar una entrada
+class Entrada {
+    private int numero;
+    private String ubicacion;
+    private double precioFinal;
+
+    public Entrada(int numero, String ubicacion, double precioFinal) {
+        this.numero = numero;
+        this.ubicacion = ubicacion;
+        this.precioFinal = precioFinal;
+    }
+
+    public int getNumero() {
+        return numero;
+    }
+
+    public String getUbicacion() {
+        return ubicacion;
+    }
+
+    public double getPrecioFinal() {
+        return precioFinal;
+    }
+
+    @Override
+    public String toString() {
+        return "Entrada{" +
+                "numero=" + numero +
+                ", ubicacion='" + ubicacion + '\'' +
+                ", precioFinal=" + precioFinal +
+                '}';
+    }
+    
+}
