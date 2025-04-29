@@ -1,0 +1,230 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
+ */
+
+/**
+ *
+ * @author bnunezd
+ */
+        
+package teatromoro;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
+public class Exp3_S7_Benjamin_Nuñez {
+    static Scanner scanner = new Scanner(System.in);
+    static String[][] asientos = new String[10][10]; // Mapa de asientos: L=Libre, R=Reservado, X=Vendido
+
+    // Variables estáticas (Paso 2)
+    static List<Entrada> resumenCompras = new ArrayList<>();
+    static List<Entrada> reservas = new ArrayList<>();
+    static int totalGeneral = 0;
+    static int entradasVendidas = 0;
+    static String nombreTeatro = "TEATRO MORO";
+
+    // Clase interna Entrada (Paso 2)
+    static class Entrada {
+        int fila;
+        int columna;
+        String zona;
+        int precioFinal;
+        boolean estudiante;
+        boolean terceraEdad;
+        LocalDateTime horaReserva;
+        boolean confirmada;
+
+        public Entrada(int fila, int columna, String zona, int precioFinal, boolean estudiante, boolean terceraEdad) {
+            this.fila = fila;
+            this.columna = columna;
+            this.zona = zona;
+            this.precioFinal = precioFinal;
+            this.estudiante = estudiante;
+            this.terceraEdad = terceraEdad;
+            this.horaReserva = LocalDateTime.now();
+            this.confirmada = false;
+        }
+    }
+
+    public static void main(String[] args) {
+        inicializarPlano();
+        mostrarBienvenida();
+
+        while (true) {
+            mostrarMenu();
+            int opcion = pedirEnteroEnRango("Seleccione una opcion (1-5): ", 1, 5);
+            switch (opcion) {
+                case 1 -> reservarEntrada();
+                case 2 -> confirmarReserva();
+                case 3 -> modificarVenta();
+                case 4 -> imprimirBoleta();
+                case 5 -> salirDelSistema();
+            }
+        }
+    }
+
+    // Paso 1: Inicializar plano
+    private static void inicializarPlano() {
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                asientos[i][j] = "L"; // L de Libre
+            }
+        }
+    }
+
+    private static void mostrarBienvenida() {
+        System.out.println("=================================================");
+        System.out.println("BIENVENIDO AL SISTEMA DE ENTRADAS " + nombreTeatro);
+        System.out.println("=================================================");
+    }
+
+    private static void mostrarMenu() {
+        System.out.println("\nMENU PRINCIPAL");
+        System.out.println("1. Reservar entrada");
+        System.out.println("2. Confirmar reserva / Comprar entrada");
+        System.out.println("3. Modificar una venta existente");
+        System.out.println("4. Imprimir boleta");
+        System.out.println("5. Salir");
+    }
+
+    // Paso 1a: Selección y reserva de asiento
+    private static void reservarEntrada() {
+        mostrarPlano();
+        System.out.println("Seleccione asiento a reservar");
+        int fila = pedirEnteroEnRango("Fila (0-9): ", 0, 9);
+        int col = pedirEnteroEnRango("Columna (0-9): ", 0, 9);
+
+        if (!asientos[fila][col].equals("L")) {
+            System.out.println("Asiento no disponible.");
+            return; // Punto de depuración 1
+        }
+
+        System.out.print("Eres estudiante? (s/n): ");
+        boolean estudiante = scanner.nextLine().equalsIgnoreCase("s");
+        System.out.print("Eres de la tercera edad? (s/n): ");
+        boolean terceraEdad = scanner.nextLine().equalsIgnoreCase("s");
+
+        String zona = definirZona(fila);
+        int precioBase = obtenerPrecioBase(zona);
+        int precioFinal = aplicarDescuentos(precioBase, estudiante, terceraEdad);
+
+        Entrada entrada = new Entrada(fila, col, zona, precioFinal, estudiante, terceraEdad);
+        reservas.add(entrada);
+        asientos[fila][col] = "R";
+
+        System.out.println("Asiento reservado con exito. Precio final: $" + precioFinal);
+        System.out.println("Asiento reservado con exito. Asiento: " + "(" + fila + "," + col + ")");
+        // Punto de depuración 2
+    }
+
+    // Paso 1a: Confirmar compra
+    private static void confirmarReserva() {
+        mostrarReservasPendientes();
+        if (reservas.isEmpty()) return;
+
+        int fila = pedirEnteroEnRango("Fila del asiento reservado: ", 0, 9);
+        int col = pedirEnteroEnRango("Columna del asiento reservado: ", 0, 9);
+
+        Entrada entradaConfirmada = null;
+        for (Entrada e : reservas) {
+            if (e.fila == fila && e.columna == col) {
+                entradaConfirmada = e;
+                break;
+            }
+        }
+
+        if (entradaConfirmada == null) {
+            System.out.println("Reserva no encontrada.");
+            return; // Punto de depuración 3
+        }
+
+        entradaConfirmada.confirmada = true;
+        reservas.remove(entradaConfirmada);
+        resumenCompras.add(entradaConfirmada);
+        asientos[fila][col] = "X";
+
+        entradasVendidas++;
+        totalGeneral += entradaConfirmada.precioFinal;
+
+        System.out.println("Compra confirmada exitosamente.\n");
+    }
+
+    private static void modificarVenta() {
+        System.out.println("Función de modificación aún no implementada.\n");
+    }
+
+    private static void imprimirBoleta() {
+        System.out.println("\nBOLETA DE COMPRA");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+
+        for (Entrada e : resumenCompras) {
+            System.out.printf("Asiento [%d,%d] - Zona: %s - Precio: $%d - Fecha: %s\n",
+                    e.fila, e.columna, e.zona, e.precioFinal, e.horaReserva.format(formatter)); // Punto de depuración 4
+        }
+
+        System.out.println("TOTAL: $" + totalGeneral);
+        System.out.println("Entradas vendidas: " + entradasVendidas);
+        // Punto de depuración 5
+    }
+
+    private static void salirDelSistema() {
+        System.out.println("Gracias por usar el sistema. Hasta luego.");
+        System.exit(0);
+    }
+
+    private static void mostrarPlano() {
+        System.out.println("\nPlano de asientos (L = Libre, R = Reservado, X = Vendido):");
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                System.out.print(asientos[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    private static void mostrarReservasPendientes() {
+        System.out.println("Reservas pendientes:");
+        for (Entrada e : reservas) {
+            System.out.printf("Asiento [%d,%d] - Zona: %s - Precio: $%d\n", e.fila, e.columna, e.zona, e.precioFinal);
+        }
+    }
+
+    private static int pedirEnteroEnRango(String mensaje, int min, int max) {
+        int opcion;
+        while (true) {
+            try {
+                System.out.print(mensaje);
+                opcion = Integer.parseInt(scanner.nextLine());
+                if (opcion >= min && opcion <= max) return opcion;
+                System.out.println("Número fuera de rango. Intente otra vez.");
+            } catch (NumberFormatException e) {
+                System.out.println("Entrada inválida. Intente nuevamente.");
+            }
+        }
+    }
+
+    private static String definirZona(int fila) {
+        if (fila < 2) return "VIP";
+        else if (fila < 4) return "Platea Alta";
+        else if (fila < 7) return "Platea Baja";
+        else return "Palcos";
+    }
+
+    private static int obtenerPrecioBase(String zona) {
+        return switch (zona) {
+            case "VIP" -> 30000;
+            case "Platea Alta" -> 19000;
+            case "Platea Baja" -> 17000;
+            case "Palcos" -> 13000;
+            default -> 15000;
+        };
+    }
+
+    private static int aplicarDescuentos(int precio, boolean estudiante, boolean terceraEdad) {
+        if (estudiante) return (int) (precio * 0.9);
+        if (terceraEdad) return (int) (precio * 0.85);
+        return precio;
+    }
+}
