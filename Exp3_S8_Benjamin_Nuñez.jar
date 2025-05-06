@@ -1,0 +1,220 @@
+package teatromoro;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
+public class Exp3_S8_Benjamin_Nuñez {
+    static Scanner scanner = new Scanner(System.in);
+
+    // Mapa de asientos: L=Libre, R=Reservado, X=Vendido
+    static String[][] asientos = new String[10][10];
+
+    // Listas dinámicas para ventas y clientes
+    static List<Venta> ventas = new ArrayList<>();
+    static List<Cliente> clientes = new ArrayList<>();
+
+    static List<Descuento> descuentos = new ArrayList<>();
+    static List<Reserva> reservas = new ArrayList<>();
+
+    static int totalGeneral = 0;
+    static int entradasVendidas = 0;
+    static String nombreTeatro = "TEATRO MORO";
+    static final int PRECIO_BASE = 10000;
+
+    // Clases internas
+    static class Venta {
+        int idCliente;
+        int idAsiento;
+        LocalDateTime fechaHora;
+        public Venta(int idCliente, int idAsiento) {
+            this.idCliente = idCliente;
+            this.idAsiento = idAsiento;
+            this.fechaHora = LocalDateTime.now();
+        }
+    }
+
+    static class Descuento {
+        String tipo;
+        double porcentaje;
+        public Descuento(String tipo, double porcentaje) {
+            this.tipo = tipo;
+            this.porcentaje = porcentaje;
+        }
+    }
+
+    static class Reserva {
+        int idReserva;
+        int idCliente;
+        int idAsiento;
+        public Reserva(int idReserva, int idCliente, int idAsiento) {
+            this.idReserva = idReserva;
+            this.idCliente = idCliente;
+            this.idAsiento = idAsiento;
+        }
+    }
+
+    static class Cliente {
+        int id;
+        String nombre;
+        boolean estudiante;
+        boolean terceraEdad;
+        public Cliente(int id, String nombre, boolean estudiante, boolean terceraEdad) {
+            this.id = id;
+            this.nombre = nombre;
+            this.estudiante = estudiante;
+            this.terceraEdad = terceraEdad;
+        }
+    }
+
+    public static void main(String[] args) {
+        inicializarPlano();
+        inicializarDescuentos();
+        mostrarBienvenida();
+
+        boolean salir = false;
+        while (!salir) {
+            mostrarMenu();
+            int opcion = pedirEnteroEnRango("Seleccione una opción (1-5): ", 1, 5);
+            switch (opcion) {
+                case 1 -> registrarCliente();
+                case 2 -> venderEntrada();
+                case 3 -> mostrarAsientos();
+                case 4 -> modificarCliente();
+                case 5 -> salir = true;
+            }
+        }
+    }
+
+    static void inicializarPlano() {
+        for (int i = 0; i < asientos.length; i++) {
+            Arrays.fill(asientos[i], "L");
+        }
+    }
+
+    static void inicializarDescuentos() {
+        descuentos.add(new Descuento("Estudiante", 0.10));
+        descuentos.add(new Descuento("TerceraEdad", 0.15));
+    }
+
+    static void registrarCliente() {
+        System.out.print("Ingrese ID de cliente: ");
+        int id = scanner.nextInt();
+        scanner.nextLine();
+
+        if (buscarClientePorId(id) != null) {
+            System.out.println("Ya existe un cliente con ese ID.");
+            return;
+        }
+
+        System.out.print("Ingrese nombre del cliente: ");
+        String nombre = scanner.nextLine();
+        System.out.print("¿Es estudiante? (true/false): ");
+        boolean estudiante = scanner.nextBoolean();
+        System.out.print("¿Es de tercera edad? (true/false): ");
+        boolean terceraEdad = scanner.nextBoolean();
+        clientes.add(new Cliente(id, nombre, estudiante, terceraEdad));
+        System.out.println("Cliente registrado correctamente.");
+    }
+
+    static void modificarCliente() {
+        System.out.print("Ingrese ID de cliente a modificar: ");
+        int id = scanner.nextInt();
+        for (Cliente cliente : clientes) {
+            if (cliente != null && cliente.id == id) {
+                System.out.print("Nuevo nombre: ");
+                scanner.nextLine();
+                cliente.nombre = scanner.nextLine();
+                System.out.print("¿Es estudiante? (true/false): ");
+                cliente.estudiante = scanner.nextBoolean();
+                System.out.print("¿Es de tercera edad? (true/false): ");
+                cliente.terceraEdad = scanner.nextBoolean();
+                System.out.println("Cliente actualizado.");
+                return;
+            }
+        }
+        System.out.println("Cliente no encontrado.");
+    }
+
+    static void venderEntrada() {
+        System.out.print("Ingrese ID del cliente: ");
+        int idCliente = scanner.nextInt();
+        Cliente cliente = buscarClientePorId(idCliente);
+        if (cliente == null) {
+            System.out.println("Cliente no encontrado.");
+            return;
+        }
+        mostrarAsientos();
+        System.out.print("Ingrese fila del asiento (0-9): ");
+        int fila = scanner.nextInt();
+        System.out.print("Ingrese columna del asiento (0-9): ");
+        int columna = scanner.nextInt();
+        if (!asientos[fila][columna].equals("L")) {
+            System.out.println("El asiento no está disponible.");
+            return;
+        }
+        asientos[fila][columna] = "X";
+        int idAsiento = fila * 10 + columna;
+        ventas.add(new Venta(idCliente, idAsiento));
+
+        double descuento = obtenerDescuento(cliente);
+        int total = (int) (PRECIO_BASE * (1 - descuento));
+        totalGeneral += total;
+        entradasVendidas++;
+
+        System.out.println("Venta realizada con éxito. Total pagado: $" + total);
+    }
+
+    static double obtenerDescuento(Cliente cliente) {
+        if (cliente.estudiante) return 0.10;
+        if (cliente.terceraEdad) return 0.15;
+        return 0.0;
+    }
+
+    static Cliente buscarClientePorId(int id) {
+        for (Cliente cliente : clientes) {
+            if (cliente != null && cliente.id == id) {
+                return cliente;
+            }
+        }
+        return null;
+    }
+
+    static void mostrarAsientos() {
+        System.out.println("\nPlano de asientos:");
+        System.out.print("  ");
+        for (int j = 0; j < 10; j++) {
+            System.out.print(j + " ");
+        }
+        System.out.println();
+        for (int i = 0; i < 10; i++) {
+            System.out.print(i + " ");
+            for (int j = 0; j < 10; j++) {
+                System.out.print(asientos[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    static void mostrarBienvenida() {
+        System.out.println("Bienvenido al sistema de " + nombreTeatro);
+    }
+
+    static void mostrarMenu() {
+        System.out.println("\nMenu Principal:");
+        System.out.println("1. Registrar cliente");
+        System.out.println("2. Vender entrada");
+        System.out.println("3. Mostrar plano de asientos");
+        System.out.println("4. Modificar cliente");
+        System.out.println("5. Salir");
+    }
+
+    static int pedirEnteroEnRango(String mensaje, int min, int max) {
+        int numero;
+        do {
+            System.out.print(mensaje);
+            numero = scanner.nextInt();
+        } while (numero < min || numero > max);
+        return numero;
+    }
+}
